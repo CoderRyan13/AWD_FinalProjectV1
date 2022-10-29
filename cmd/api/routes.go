@@ -19,6 +19,7 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodGet, "/v1/forums/:id", app.showForumHandler)
 	router.HandlerFunc(http.MethodPatch, "/v1/forums/:id", app.updateForumHandler)
 	router.HandlerFunc(http.MethodDelete, "/v1/forums/:id", app.deleteForumHandler)
+	router.HandlerFunc(http.MethodPost, "/v1/users", app.registerUserHandler)
 
 	return app.recoverPanic(app.rateLimit(router))
 }
