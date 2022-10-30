@@ -4371,7 +4371,7 @@ function _Browser_load(url)
 	}));
 }
 var $elm$core$Basics$False = {$: 'False'};
-var $author$project$Signup$initialModel = {email: '', loggedIn: false, name: '', password: '', passwordAgain: '', username: ''};
+var $author$project$Signup$initialModel = {email: '', loggedIn: false, password: '', passwordAgain: '', username: ''};
 var $elm$core$Basics$EQ = {$: 'EQ'};
 var $elm$core$Basics$GT = {$: 'GT'};
 var $elm$core$Basics$LT = {$: 'LT'};
@@ -5184,33 +5184,40 @@ var $elm$browser$Browser$sandbox = function (impl) {
 var $author$project$Signup$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
-			case 'Name':
-				var name = msg.a;
-				return _Utils_update(
-					model,
-					{name: name});
-			case 'Email':
-				var email = msg.a;
-				return _Utils_update(
-					model,
-					{email: email});
 			case 'Username':
 				var username = msg.a;
 				return _Utils_update(
 					model,
 					{username: username});
+			case 'Email':
+				var email = msg.a;
+				return _Utils_update(
+					model,
+					{email: email});
 			case 'Password':
 				var password = msg.a;
 				return _Utils_update(
 					model,
 					{password: password});
 			default:
-				var password = msg.a;
+				var passwordAgain = msg.a;
 				return _Utils_update(
 					model,
-					{passwordAgain: password});
+					{passwordAgain: passwordAgain});
 		}
 	});
+var $author$project$Signup$Email = function (a) {
+	return {$: 'Email', a: a};
+};
+var $author$project$Signup$Password = function (a) {
+	return {$: 'Password', a: a};
+};
+var $author$project$Signup$PasswordAgain = function (a) {
+	return {$: 'PasswordAgain', a: a};
+};
+var $author$project$Signup$Username = function (a) {
+	return {$: 'Username', a: a};
+};
 var $elm$html$Html$button = _VirtualDom_node('button');
 var $elm$html$Html$div = _VirtualDom_node('div');
 var $elm$html$Html$form = _VirtualDom_node('form');
@@ -5225,9 +5232,67 @@ var $elm$html$Html$Attributes$stringProperty = F2(
 	});
 var $elm$html$Html$Attributes$id = $elm$html$Html$Attributes$stringProperty('id');
 var $elm$html$Html$input = _VirtualDom_node('input');
+var $elm$html$Html$Events$alwaysStop = function (x) {
+	return _Utils_Tuple2(x, true);
+};
+var $elm$virtual_dom$VirtualDom$MayStopPropagation = function (a) {
+	return {$: 'MayStopPropagation', a: a};
+};
+var $elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
+var $elm$html$Html$Events$stopPropagationOn = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$MayStopPropagation(decoder));
+	});
+var $elm$json$Json$Decode$field = _Json_decodeField;
+var $elm$json$Json$Decode$at = F2(
+	function (fields, decoder) {
+		return A3($elm$core$List$foldr, $elm$json$Json$Decode$field, decoder, fields);
+	});
+var $elm$json$Json$Decode$string = _Json_decodeString;
+var $elm$html$Html$Events$targetValue = A2(
+	$elm$json$Json$Decode$at,
+	_List_fromArray(
+		['target', 'value']),
+	$elm$json$Json$Decode$string);
+var $elm$html$Html$Events$onInput = function (tagger) {
+	return A2(
+		$elm$html$Html$Events$stopPropagationOn,
+		'input',
+		A2(
+			$elm$json$Json$Decode$map,
+			$elm$html$Html$Events$alwaysStop,
+			A2($elm$json$Json$Decode$map, tagger, $elm$html$Html$Events$targetValue)));
+};
 var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
 var $elm$html$Html$Attributes$type_ = $elm$html$Html$Attributes$stringProperty('type');
+var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
+var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
+var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
+var $author$project$Signup$viewValidation = function (model) {
+	return _Utils_eq(model.password, model.passwordAgain) ? A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				A2($elm$html$Html$Attributes$style, 'color', 'green')
+			]),
+		_List_fromArray(
+			[
+				$elm$html$Html$text('OK')
+			])) : A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				A2($elm$html$Html$Attributes$style, 'color', 'red')
+			]),
+		_List_fromArray(
+			[
+				$elm$html$Html$text('Passwords do not match!')
+			]));
+};
 var $author$project$Signup$view = function (model) {
 	return A2(
 		$elm$html$Html$div,
@@ -5251,13 +5316,15 @@ var $author$project$Signup$view = function (model) {
 						_List_Nil,
 						_List_fromArray(
 							[
-								$elm$html$Html$text('Name'),
+								$elm$html$Html$text('Username'),
 								A2(
 								$elm$html$Html$input,
 								_List_fromArray(
 									[
-										$elm$html$Html$Attributes$id('name'),
-										$elm$html$Html$Attributes$type_('text')
+										$elm$html$Html$Attributes$id('username'),
+										$elm$html$Html$Attributes$type_('text'),
+										$elm$html$Html$Attributes$value(model.username),
+										$elm$html$Html$Events$onInput($author$project$Signup$Username)
 									]),
 								_List_Nil)
 							])),
@@ -5272,22 +5339,9 @@ var $author$project$Signup$view = function (model) {
 								_List_fromArray(
 									[
 										$elm$html$Html$Attributes$id('email'),
-										$elm$html$Html$Attributes$type_('email')
-									]),
-								_List_Nil)
-							])),
-						A2(
-						$elm$html$Html$div,
-						_List_Nil,
-						_List_fromArray(
-							[
-								$elm$html$Html$text('Username'),
-								A2(
-								$elm$html$Html$input,
-								_List_fromArray(
-									[
-										$elm$html$Html$Attributes$id('username'),
-										$elm$html$Html$Attributes$type_('text')
+										$elm$html$Html$Attributes$type_('email'),
+										$elm$html$Html$Attributes$value(model.email),
+										$elm$html$Html$Events$onInput($author$project$Signup$Email)
 									]),
 								_List_Nil)
 							])),
@@ -5302,7 +5356,9 @@ var $author$project$Signup$view = function (model) {
 								_List_fromArray(
 									[
 										$elm$html$Html$Attributes$id('password'),
-										$elm$html$Html$Attributes$type_('password')
+										$elm$html$Html$Attributes$type_('password'),
+										$elm$html$Html$Attributes$value(model.password),
+										$elm$html$Html$Events$onInput($author$project$Signup$Password)
 									]),
 								_List_Nil)
 							])),
@@ -5317,10 +5373,13 @@ var $author$project$Signup$view = function (model) {
 								_List_fromArray(
 									[
 										$elm$html$Html$Attributes$id('passwordAgain'),
-										$elm$html$Html$Attributes$type_('password')
+										$elm$html$Html$Attributes$type_('password'),
+										$elm$html$Html$Attributes$value(model.passwordAgain),
+										$elm$html$Html$Events$onInput($author$project$Signup$PasswordAgain)
 									]),
 								_List_Nil)
 							])),
+						$author$project$Signup$viewValidation(model),
 						A2(
 						$elm$html$Html$div,
 						_List_Nil,

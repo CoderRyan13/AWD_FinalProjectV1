@@ -6,9 +6,8 @@ import Browser
 import Html.Events exposing(onInput)
 
 type alias User =
-    { name : String
+    { username : String
     , email : String
-    , username : String
     , password : String
     , passwordAgain : String
     , loggedIn : Bool
@@ -18,9 +17,8 @@ type alias User =
 
 initialModel : User
 initialModel =
-    { name = ""
+    { username = ""
     , email = ""
-    , username = ""
     , password = ""
     , passwordAgain = ""
     , loggedIn = False
@@ -29,9 +27,8 @@ initialModel =
 -- UPDATE
 
 type Msg
-    = Name String
+    = Username String
     | Email String
-    | Username String
     | Password String
     | PasswordAgain String
     --| LoggedIn Bool
@@ -39,20 +36,17 @@ type Msg
 update : Msg -> User -> User
 update msg model = 
     case msg of 
-        Name name ->
-            { model | name = name}
+        Username username ->
+            { model | username = username}
 
         Email email ->
             { model | email = email}
 
-        Username username ->
-            { model | username = username}
-
         Password password ->
             { model | password = password}
 
-        PasswordAgain password ->
-            { model | passwordAgain = password}
+        PasswordAgain passwordAgain ->
+            { model | passwordAgain = passwordAgain}
 
 -- VIEW
 
@@ -62,31 +56,35 @@ view model =
         [ h1 [] [ text "Sign up" ]
         , Html.form []
             [ div []
-                [ text "Name"
-                , input [ id "name", type_ "text" ] []
+                [ text "Username"
+                , input [ id "username", type_ "text", value model.username, onInput Username ] []
                 ]
             , div []
                 [ text "Email"
-                , input [ id "email", type_ "email" ] []
-                ]
-            , div []
-                [ text "Username"
-                , input [ id "username", type_ "text" ] []
+                , input [ id "email", type_ "email", value model.email, onInput Email ] []
                 ]
             , div []
                 [ text "Password"
-                , input [ id "password", type_ "password" ] []
+                , input [ id "password", type_ "password", value model.password, onInput Password ] []
                 ]
             , div []
                 [ text "Re-enter Password"
-                , input [ id "passwordAgain", type_ "password" ] []
+                , input [ id "passwordAgain", type_ "password", value model.passwordAgain, onInput PasswordAgain ] []
                 ]
+                , viewValidation model
             , div []
                 [ button [ type_ "submit" ]
                     [ text "Create my account" ]
                 ]
-            ]
+            ] 
         ]
+
+viewValidation : User -> Html msg
+viewValidation model =
+  if model.password == model.passwordAgain then
+    div [ style "color" "green" ] [ text "OK" ]
+  else
+    div [ style "color" "red" ] [ text "Passwords do not match!" ]
 
 --main : Html msg
 main =
