@@ -49,7 +49,7 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 		case errors.Is(err, data.ErrDuplicateEmail):
 			v.AddError("email", "a user with this email address already exists")
 			app.failedValidationResponse(w, r, v.Errors)
-		case errors.Is(err, data.ErrDuplicateEmail):
+		case errors.Is(err, data.ErrDuplicateUsername):
 			v.AddError("username", "a user with this username already exists")
 			app.failedValidationResponse(w, r, v.Errors)
 		default:

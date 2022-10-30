@@ -3,7 +3,6 @@ module Login exposing (main)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Browser
-import Html.Events exposing(onInput)
 
 type alias User =
     { username : String
