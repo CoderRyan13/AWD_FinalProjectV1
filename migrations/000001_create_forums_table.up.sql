@@ -2,14 +2,9 @@
 
 CREATE TABLE IF NOT EXISTS forums (
     id bigserial PRIMARY KEY,
+    users_id int DEFAULT 1,
     created_at timestamp(0) with time zone NOT NULL DEFAULT NOW(),
-    name text NOT NULL,
-    level text NOT NULL,
-    contact text NOT NULL,
-    phone text NOT NULL,
-    email text NOT NULL,
-    website text NOT NULL,
-    address text NOT NULL,
-    mode text[] NOT NULL,
+    topic text NOT NULL,
+    discussion text[] NOT NULL,
     version integer NOT NULL DEFAULT 1
 );
