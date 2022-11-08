@@ -82,7 +82,7 @@ view model =
 viewValidation : User -> Html msg
 viewValidation model =
   if model.password == model.passwordAgain then
-    div [ style "color" "green" ] [ text "OK" ]
+    div [] [ text " " ]
   else
     div [ style "color" "red" ] [ text "Passwords do not match!" ]
 

@@ -50,6 +50,8 @@ view model =
                 [ text "Password"
                 , input [ id "password", type_ "password" ] []
                 ]
+            , h5 [] [ text "Forgot Password?" ]
+            , h5 [] [ text "No Account?" ]
             , div []
                 [ button [ type_ "submit" ]
                     [ text "Sign In" ]

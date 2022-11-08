@@ -5275,13 +5275,10 @@ var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
 var $author$project$Signup$viewValidation = function (model) {
 	return _Utils_eq(model.password, model.passwordAgain) ? A2(
 		$elm$html$Html$div,
+		_List_Nil,
 		_List_fromArray(
 			[
-				A2($elm$html$Html$Attributes$style, 'color', 'green')
-			]),
-		_List_fromArray(
-			[
-				$elm$html$Html$text('OK')
+				$elm$html$Html$text(' ')
 			])) : A2(
 		$elm$html$Html$div,
 		_List_fromArray(

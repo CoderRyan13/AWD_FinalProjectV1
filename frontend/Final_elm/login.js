@@ -5199,6 +5199,7 @@ var $elm$html$Html$button = _VirtualDom_node('button');
 var $elm$html$Html$div = _VirtualDom_node('div');
 var $elm$html$Html$form = _VirtualDom_node('form');
 var $elm$html$Html$h1 = _VirtualDom_node('h1');
+var $elm$html$Html$h5 = _VirtualDom_node('h5');
 var $elm$json$Json$Encode$string = _Json_wrap;
 var $elm$html$Html$Attributes$stringProperty = F2(
 	function (key, string) {
@@ -5259,6 +5260,20 @@ var $author$project$Login$view = function (model) {
 										$elm$html$Html$Attributes$type_('password')
 									]),
 								_List_Nil)
+							])),
+						A2(
+						$elm$html$Html$h5,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$elm$html$Html$text('Forgot Password?')
+							])),
+						A2(
+						$elm$html$Html$h5,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$elm$html$Html$text('No Account?')
 							])),
 						A2(
 						$elm$html$Html$div,
