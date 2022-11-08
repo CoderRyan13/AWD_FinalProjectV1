@@ -1,4 +1,4 @@
--- Filename: migrations/000004_create_users_table.up.sql
+-- Filename: migrations/000003_create_users_table.up.sql
 
 CREATE TABLE IF NOT EXISTS users (
     id bigserial PRIMARY KEY,

@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"strings"
 
 	"AWD_FinalProject.ryanarmstrong.net/internal/data"
 	"AWD_FinalProject.ryanarmstrong.net/internal/validator"
@@ -16,8 +15,8 @@ import (
 func (app *application) createForumHandler(w http.ResponseWriter, r *http.Request) {
 	// Our target decode destination
 	var input struct {
-		Topic      string   `json:"topic"`
-		Discussion []string `json:"discussion"`
+		Topic      string `json:"topic"`
+		Discussion string `json:"discussion"`
 	}
 	// Initialize a new json.Decoder instance
 	err := app.readJSON(w, r, &input)
@@ -109,8 +108,8 @@ func (app *application) updateForumHandler(w http.ResponseWriter, r *http.Reques
 	// default value of nil
 	// If a field remains nil then we know the client did not update it
 	var input struct {
-		Topic      *string  `json:"topic"`
-		Discussion []string `json:"discussion"`
+		Topic      *string `json:"topic"`
+		Discussion *string `json:"discussion"`
 	}
 	// Initialize a new json.Decoder instance
 	err = app.readJSON(w, r, &input)
@@ -123,7 +122,7 @@ func (app *application) updateForumHandler(w http.ResponseWriter, r *http.Reques
 		forum.Topic = *input.Topic
 	}
 	if input.Discussion != nil {
-		forum.Discussion = input.Discussion
+		forum.Discussion = *input.Discussion
 		//forum.Mode = append(forum.Mode, strings.Join(input.Mode, " "))
 	}
 	// Perform validation on the updated Forum. If validation fails, then
@@ -221,7 +220,8 @@ func (app *application) listForumsHandler(w http.ResponseWriter, r *http.Request
 	}
 }
 
-func (app *application) addDiscussionHandler(w http.ResponseWriter, r *http.Request) {
+/*
+func (app *application) addCommentHandler(w http.ResponseWriter, r *http.Request) {
 	// This method adds a discussion to the slice
 	// Get the id for the forum that needs updating
 	id, err := app.readIDParam(r)
@@ -246,7 +246,7 @@ func (app *application) addDiscussionHandler(w http.ResponseWriter, r *http.Requ
 	// default value of nil
 	// If a field remains nil then we know the client did not add a discussion
 	var input struct {
-		Discussion []string `json:"discussion"`
+		Discussion *string `json:"discussion"`
 	}
 	// Initialize a new json.Decoder instance
 	err = app.readJSON(w, r, &input)
@@ -256,7 +256,7 @@ func (app *application) addDiscussionHandler(w http.ResponseWriter, r *http.Requ
 	}
 	// Check for added discussion
 	if input.Discussion != nil {
-		forum.Discussion = append(forum.Discussion, strings.Join(input.Discussion, " "))
+		forum.Discussion = *input.Discussion
 	}
 	// Perform validation on the updated Forum. If validation fails, then
 	// we send a 422 - Unprocessable Entity response to the client
@@ -284,4 +284,4 @@ func (app *application) addDiscussionHandler(w http.ResponseWriter, r *http.Requ
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
-}
+} */

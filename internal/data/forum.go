@@ -15,10 +15,11 @@ import (
 
 type Forum struct {
 	ID         int64     `json:"id"` // Struct tags
-	Users_ID   int64     `json:"users_id"`
+	User_ID    int64     `json:"user_id"`
 	CreatedAt  time.Time `json:"created_at"`
 	Topic      string    `json:"topic"`
-	Discussion []string  `json:"discussion"`
+	Discussion string    `json:"discussion"`
+	Comments   []string  `json:"comments"`
 	Version    int32     `json:"version"`
 }
 
@@ -27,9 +28,11 @@ func ValidateForum(v *validator.Validator, forum *Forum) {
 	v.Check(forum.Topic != "", "topic", "must be provided")
 	v.Check(len(forum.Topic) <= 200, "topic", "must not be more than 200 bytes long")
 
-	v.Check(forum.Discussion != nil, "discussion", "must be provided")
-	v.Check(len(forum.Discussion) >= 1, "discussion", "must contain at least 1 entry")
-	v.Check(validator.Unique(forum.Discussion), "discussion", "must not contain duplicate entries")
+	v.Check(forum.Discussion != "", "discussion", "must be provided")
+
+	//v.Check(forum.Discussion != nil, "discussion", "must be provided")
+	//v.Check(len(forum.Discussion) >= 1, "discussion", "must contain at least 1 entry")
+	v.Check(validator.Unique(forum.Comments), "comments", "must not contain duplicate entries")
 }
 
 // Define a ForumModel which wraps a sql.DB connection pool
@@ -42,7 +45,7 @@ func (m ForumModel) Insert(forum *Forum) error {
 	query := `
 		INSERT INTO forums (topic, discussion)
 		VALUES ($1, $2)
-		RETURNING id, users_id, created_at, version
+		RETURNING id, user_id, created_at, version, comments
 	`
 	// Create a context
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
@@ -50,9 +53,9 @@ func (m ForumModel) Insert(forum *Forum) error {
 	defer cancel()
 	// Collect the data fields into a slice
 	args := []interface{}{
-		forum.Topic, pq.Array(forum.Discussion),
+		forum.Topic, forum.Discussion,
 	}
-	return m.DB.QueryRowContext(ctx, query, args...).Scan(&forum.ID, &forum.Users_ID, &forum.CreatedAt, &forum.Version)
+	return m.DB.QueryRowContext(ctx, query, args...).Scan(&forum.ID, &forum.User_ID, &forum.CreatedAt, &forum.Version, pq.Array(&forum.Comments))
 }
 
 // Get() allows us to recieve a specific Forum
@@ -63,7 +66,7 @@ func (m ForumModel) Get(id int64) (*Forum, error) {
 	}
 	// Create the query
 	query := `
-		SELECT id, users_id, created_at, topic, discussion, version
+		SELECT id, user_id, created_at, topic, discussion, version, comments
 		FROM forums
 		WHERE id = $1
 	`
@@ -76,11 +79,12 @@ func (m ForumModel) Get(id int64) (*Forum, error) {
 	// Execute the query using QueryRow()
 	err := m.DB.QueryRowContext(ctx, query, id).Scan(
 		&forum.ID,
-		&forum.Users_ID,
+		&forum.User_ID,
 		&forum.CreatedAt,
 		&forum.Topic,
-		pq.Array(&forum.Discussion),
+		&forum.Discussion,
 		&forum.Version,
+		pq.Array(&forum.Comments),
 	)
 	// Handle any errors
 	if err != nil {
@@ -113,7 +117,7 @@ func (m ForumModel) Update(forum *Forum) error {
 	defer cancel()
 	args := []interface{}{
 		forum.Topic,
-		pq.Array(forum.Discussion),
+		forum.Discussion,
 		forum.ID,
 		forum.Version,
 	}
@@ -167,7 +171,7 @@ func (m ForumModel) Delete(id int64) error {
 func (m ForumModel) GetAll(topic string, filters Filters) ([]*Forum, Metadata, error) {
 	// Construct the query
 	query := fmt.Sprintf(`
-		SELECT COUNT(*) OVER(), id, users_id, created_at, topic, discussion, version
+		SELECT COUNT(*) OVER(), id, user_id, created_at, topic, discussion, version, comments
 		FROM forums
 		WHERE (to_tsvector('simple', topic) @@ plainto_tsquery('simple', $1) OR $1 = '')
 		ORDER BY %s %s, id ASC
@@ -194,11 +198,12 @@ func (m ForumModel) GetAll(topic string, filters Filters) ([]*Forum, Metadata, e
 		err := rows.Scan(
 			&totalRecords,
 			&forum.ID,
-			&forum.Users_ID,
+			&forum.User_ID,
 			&forum.CreatedAt,
 			&forum.Topic,
-			pq.Array(&forum.Discussion),
+			&forum.Discussion,
 			&forum.Version,
+			pq.Array(&forum.Comments),
 		)
 		if err != nil {
 			return nil, Metadata{}, err
@@ -215,6 +220,7 @@ func (m ForumModel) GetAll(topic string, filters Filters) ([]*Forum, Metadata, e
 	return forums, metadata, nil
 }
 
+/*
 // addDiscussion() allows us to add a discussion to a specific Forum
 // Optimistic locking (version number)
 func (m ForumModel) addDiscussion(forum *Forum) error {
@@ -246,4 +252,4 @@ func (m ForumModel) addDiscussion(forum *Forum) error {
 		}
 	}
 	return nil
-}
+} */
