@@ -18,6 +18,9 @@ var (
 	ErrDuplicateUsername = errors.New("duplicate username")
 )
 
+// Declare an AnonymousUser, no id, no username, no email, no password
+var AnonymousUser = &User{}
+
 type User struct {
 	ID        int64     `json:"id"`
 	CreatedAt time.Time `json:"created_at"`
@@ -26,6 +29,11 @@ type User struct {
 	Password  password  `json:"-"`
 	Activated bool      `json:"activated"`
 	Version   int       `json:"-"`
+}
+
+// Check if a user is anonymous
+func (u *User) IsAnonymous() bool {
+	return u == AnonymousUser
 }
 
 // Create a customer passord type

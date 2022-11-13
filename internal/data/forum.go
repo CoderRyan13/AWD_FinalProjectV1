@@ -14,13 +14,14 @@ import (
 )
 
 type Forum struct {
-	ID         int64     `json:"id"` // Struct tags
-	User_ID    int64     `json:"user_id"`
-	CreatedAt  time.Time `json:"created_at"`
-	Topic      string    `json:"topic"`
-	Discussion string    `json:"discussion"`
-	Comments   []string  `json:"comments"`
-	Version    int32     `json:"version"`
+	ID             int64     `json:"id"` // Struct tags
+	User_ID        int64     `json:"user_id"`
+	CreatedAt      time.Time `json:"created_at"`
+	Topic          string    `json:"topic"`
+	Discussion     string    `json:"discussion"`
+	Comments       []string  `json:"comments"`
+	Total_Comments int64     `json:"total_comments"`
+	Version        int32     `json:"version"`
 }
 
 func ValidateForum(v *validator.Validator, forum *Forum) {
@@ -45,7 +46,7 @@ func (m ForumModel) Insert(forum *Forum) error {
 	query := `
 		INSERT INTO forums (topic, discussion)
 		VALUES ($1, $2)
-		RETURNING id, user_id, created_at, version, comments
+		RETURNING id, user_id, created_at, version, comments, total_comments
 	`
 	// Create a context
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
@@ -55,7 +56,7 @@ func (m ForumModel) Insert(forum *Forum) error {
 	args := []interface{}{
 		forum.Topic, forum.Discussion,
 	}
-	return m.DB.QueryRowContext(ctx, query, args...).Scan(&forum.ID, &forum.User_ID, &forum.CreatedAt, &forum.Version, pq.Array(&forum.Comments))
+	return m.DB.QueryRowContext(ctx, query, args...).Scan(&forum.ID, &forum.User_ID, &forum.CreatedAt, &forum.Version, pq.Array(&forum.Comments), &forum.Total_Comments)
 }
 
 // Get() allows us to recieve a specific Forum
@@ -66,7 +67,7 @@ func (m ForumModel) Get(id int64) (*Forum, error) {
 	}
 	// Create the query
 	query := `
-		SELECT id, user_id, created_at, topic, discussion, version, comments
+		SELECT id, user_id, created_at, topic, discussion, version, comments, total_comments
 		FROM forums
 		WHERE id = $1
 	`
@@ -85,6 +86,7 @@ func (m ForumModel) Get(id int64) (*Forum, error) {
 		&forum.Discussion,
 		&forum.Version,
 		pq.Array(&forum.Comments),
+		&forum.Total_Comments,
 	)
 	// Handle any errors
 	if err != nil {
@@ -107,8 +109,8 @@ func (m ForumModel) Update(forum *Forum) error {
 	query := `
 		UPDATE forums
 		SET topic = $1, discussion = $2, version = version + 1
-		WHERE id = $3
-		AND version = $4
+		WHERE id = $4
+		AND version = $5
 		RETURNING version
 	`
 	// Create a context
@@ -167,11 +169,11 @@ func (m ForumModel) Delete(id int64) error {
 	return nil
 }
 
-// the GetAll() method returns a list of all the schools sorted by id
+// the GetAll() method returns a list of all the forums sorted by id
 func (m ForumModel) GetAll(topic string, filters Filters) ([]*Forum, Metadata, error) {
 	// Construct the query
 	query := fmt.Sprintf(`
-		SELECT COUNT(*) OVER(), id, user_id, created_at, topic, discussion, version, comments
+		SELECT COUNT(*) OVER(), id, user_id, created_at, topic, discussion, version, comments, total_comments
 		FROM forums
 		WHERE (to_tsvector('simple', topic) @@ plainto_tsquery('simple', $1) OR $1 = '')
 		ORDER BY %s %s, id ASC
@@ -204,6 +206,7 @@ func (m ForumModel) GetAll(topic string, filters Filters) ([]*Forum, Metadata, e
 			&forum.Discussion,
 			&forum.Version,
 			pq.Array(&forum.Comments),
+			&forum.Total_Comments,
 		)
 		if err != nil {
 			return nil, Metadata{}, err
@@ -220,29 +223,28 @@ func (m ForumModel) GetAll(topic string, filters Filters) ([]*Forum, Metadata, e
 	return forums, metadata, nil
 }
 
-/*
-// addDiscussion() allows us to add a discussion to a specific Forum
+// addComment() allows us to add a comment to a specific Forum
 // Optimistic locking (version number)
-func (m ForumModel) addDiscussion(forum *Forum) error {
+func (m ForumModel) AddComment(forum *Forum) error {
 	// Create a query
 	query := `
 		UPDATE forums
-		SET discussion = $1, version = version + 1
+		SET comments = $1, total_comments = total_comments + 1
 		WHERE id = $2
 		AND version = $3
-		RETURNING version
+		RETURNING total_comments
 	`
 	// Create a context
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	// Cleanup to prevent memory leaks
 	defer cancel()
 	args := []interface{}{
-		pq.Array(forum.Discussion),
+		pq.Array(forum.Comments),
 		forum.ID,
 		forum.Version,
 	}
 	// Check for edit conflicts
-	err := m.DB.QueryRowContext(ctx, query, args...).Scan(&forum.Version)
+	err := m.DB.QueryRowContext(ctx, query, args...).Scan(&forum.Total_Comments)
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
@@ -252,4 +254,4 @@ func (m ForumModel) addDiscussion(forum *Forum) error {
 		}
 	}
 	return nil
-} */
+}
