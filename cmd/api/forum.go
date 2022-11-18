@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"AWD_FinalProject.ryanarmstrong.net/internal/data"
 	"AWD_FinalProject.ryanarmstrong.net/internal/validator"
@@ -30,6 +31,7 @@ func (app *application) createForumHandler(w http.ResponseWriter, r *http.Reques
 	forum := &data.Forum{
 		Topic:      input.Topic,
 		Discussion: input.Discussion,
+		Username:   "Posted by: " + data.Username + " on - ",
 	}
 	// Initialize a new Validator instance
 	v := validator.New()
@@ -259,6 +261,8 @@ func (app *application) addCommentHandler(w http.ResponseWriter, r *http.Request
 	// Check for added discussion
 	if input.Comments != nil {
 		//forum.Comments = *input.Comments
+		data.Date = time.Now()
+		input.Comments = append(input.Comments, " - Posted by: ", data.Username, " on ", data.Date.Format("2006-01-02"))
 		forum.Comments = append(forum.Comments, strings.Join(input.Comments, " "))
 	}
 	// Perform validation on the updated Forum. If validation fails, then

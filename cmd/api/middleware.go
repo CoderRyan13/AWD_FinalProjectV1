@@ -141,6 +141,7 @@ func (app *application) requireAuthenticatedUser(next http.HandlerFunc) http.Han
 			app.authenticationRequiredResponse(w, r)
 			return
 		}
+		data.Username = user.Username
 		next.ServeHTTP(w, r)
 	})
 }

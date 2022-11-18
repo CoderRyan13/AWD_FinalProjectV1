@@ -13,9 +13,15 @@ import (
 	"github.com/lib/pq"
 )
 
+// global var to hold the value of the username
+var Username string
+
+// glabal var to hold the current time for when comment is posted
+var Date time.Time
+
 type Forum struct {
 	ID             int64     `json:"id"` // Struct tags
-	User_ID        int64     `json:"user_id"`
+	Username       string    `json:"username"`
 	CreatedAt      time.Time `json:"created_at"`
 	Topic          string    `json:"topic"`
 	Discussion     string    `json:"discussion"`
@@ -44,9 +50,9 @@ type ForumModel struct {
 // Insert() allows us to create a new Forum
 func (m ForumModel) Insert(forum *Forum) error {
 	query := `
-		INSERT INTO forums (topic, discussion)
-		VALUES ($1, $2)
-		RETURNING id, user_id, created_at, version, comments, total_comments
+		INSERT INTO forums (topic, discussion, username)
+		VALUES ($1, $2, $3)
+		RETURNING id, created_at, version, comments, total_comments
 	`
 	// Create a context
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
@@ -54,9 +60,9 @@ func (m ForumModel) Insert(forum *Forum) error {
 	defer cancel()
 	// Collect the data fields into a slice
 	args := []interface{}{
-		forum.Topic, forum.Discussion,
+		forum.Topic, forum.Discussion, forum.Username,
 	}
-	return m.DB.QueryRowContext(ctx, query, args...).Scan(&forum.ID, &forum.User_ID, &forum.CreatedAt, &forum.Version, pq.Array(&forum.Comments), &forum.Total_Comments)
+	return m.DB.QueryRowContext(ctx, query, args...).Scan(&forum.ID, &forum.CreatedAt, &forum.Version, pq.Array(&forum.Comments), &forum.Total_Comments)
 }
 
 // Get() allows us to recieve a specific Forum
@@ -67,7 +73,7 @@ func (m ForumModel) Get(id int64) (*Forum, error) {
 	}
 	// Create the query
 	query := `
-		SELECT id, user_id, created_at, topic, discussion, version, comments, total_comments
+		SELECT id, username, created_at, topic, discussion, version, comments, total_comments
 		FROM forums
 		WHERE id = $1
 	`
@@ -80,7 +86,7 @@ func (m ForumModel) Get(id int64) (*Forum, error) {
 	// Execute the query using QueryRow()
 	err := m.DB.QueryRowContext(ctx, query, id).Scan(
 		&forum.ID,
-		&forum.User_ID,
+		&forum.Username,
 		&forum.CreatedAt,
 		&forum.Topic,
 		&forum.Discussion,
@@ -173,7 +179,7 @@ func (m ForumModel) Delete(id int64) error {
 func (m ForumModel) GetAll(topic string, filters Filters) ([]*Forum, Metadata, error) {
 	// Construct the query
 	query := fmt.Sprintf(`
-		SELECT COUNT(*) OVER(), id, user_id, created_at, topic, discussion, version, comments, total_comments
+		SELECT COUNT(*) OVER(), id, username, created_at, topic, discussion, version, comments, total_comments
 		FROM forums
 		WHERE (to_tsvector('simple', topic) @@ plainto_tsquery('simple', $1) OR $1 = '')
 		ORDER BY %s %s, id ASC
@@ -200,7 +206,7 @@ func (m ForumModel) GetAll(topic string, filters Filters) ([]*Forum, Metadata, e
 		err := rows.Scan(
 			&totalRecords,
 			&forum.ID,
-			&forum.User_ID,
+			&forum.Username,
 			&forum.CreatedAt,
 			&forum.Topic,
 			&forum.Discussion,
